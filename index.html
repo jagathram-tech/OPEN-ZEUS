@@ -3607,7 +3607,7 @@
 
             // Clean URL
             if (hash.includes('gh_token=') || hash.includes('gh_error=')) {
-                history.replaceState(null, '', window.location.pathname + window.location.search);
+                window.history.replaceState(null, '', window.location.pathname + window.location.search);
             }
 
             if (token) {
