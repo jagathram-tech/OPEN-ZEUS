@@ -337,18 +337,54 @@
 
         /* Group headings */
         .dropdown-group-title {
-            padding: 6px 14px;
+            padding: 8px 14px;
             font-size: 0.7rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.05em;
             color: var(--text-muted);
-            background-color: #ffffff;
+            background-color: #f8fafc;
             user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .dropdown-group:first-child .dropdown-group-title {
+            border-top: none;
+        }
+
+        .dropdown-group-title:hover {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .group-chevron-icon {
+            width: 12px;
+            height: 12px;
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            color: var(--text-muted);
+        }
+
+        .dropdown-group-title:hover .group-chevron-icon {
+            color: var(--primary);
         }
 
         .dropdown-group {
             margin-bottom: 4px;
+        }
+
+        /* Collapsed state adjustments */
+        .dropdown-group.collapsed .dropdown-option {
+            display: none !important;
+        }
+
+        .dropdown-group.collapsed .group-chevron-icon {
+            transform: rotate(-90deg);
         }
 
         /* Single option items */
@@ -1295,9 +1331,9 @@
         // Core Models Directory (Predefined fallback list)
         const PREDEFINED_MODELS = [
             // Anthropic
+            { id: 'claude-opus-4-7', name: 'Claude Opus 4.7', provider: 'anthropic', category: 'chat' },
             { id: 'claude-sonnet-4-6', name: 'Claude Sonnet 4.6', provider: 'anthropic', category: 'chat' },
             { id: 'claude-opus-4.7-fast', name: 'Claude Opus 4.7 Fast', provider: 'anthropic', category: 'chat' },
-            { id: 'claude-opus-4-7', name: 'Claude Opus 4.7', provider: 'anthropic', category: 'chat' },
             { id: 'claude-opus-4.6-fast', name: 'Claude Opus 4.6 Fast', provider: 'anthropic', category: 'chat' },
             { id: 'claude-opus-4-6', name: 'Claude Opus 4.6', provider: 'anthropic', category: 'chat' },
             { id: 'claude-opus-4-5', name: 'Claude Opus 4.5', provider: 'anthropic', category: 'chat' },
@@ -1318,6 +1354,15 @@
             { id: 'o3-mini', name: 'o3 Mini', provider: 'openai', category: 'chat' },
             { id: 'o4-mini', name: 'o4 Mini', provider: 'openai', category: 'chat' },
             
+            // Google
+            { id: 'gemini-3.5-flash', name: 'Gemini 3.5 Flash', provider: 'google', category: 'chat' },
+            
+            // xAI
+            { id: 'grok-4.3', name: 'Grok 4.3', provider: 'xai', category: 'chat' },
+            
+            // DeepSeek
+            { id: 'deepseek-v4-pro', name: 'DeepSeek v4 Pro', provider: 'deepseek', category: 'chat' },
+            
             // Image Generation
             { id: 'gpt-image-2', name: 'GPT Image 2', provider: 'openai', category: 'image' },
             { id: 'gpt-image-1.5', name: 'GPT Image 1.5', provider: 'openai', category: 'image' },
@@ -1336,15 +1381,32 @@
 
         // Featured Model IDs for quick access
         const featuredModelIds = [
-            'claude-sonnet-4-6',
-            'gpt-4o',
-            'gpt-4o-mini',
-            'gpt-image-2',
-            'tts-1-hd'
+            'claude-opus-4-7',
+            'gpt-5.5',
+            'gemini-3.5-flash',
+            'grok-4.3',
+            'deepseek-v4-pro'
         ];
 
         // IP-keyed favorites state
         let userIp = 'local';
+
+        // Collapsed state map for groups: key -> true if collapsed
+        const collapsedGroups = {
+            'favorites': false,
+            'featured': false,
+            'free': false,
+            'anthropic': false,
+            'xai': false,
+            'chatgpt': false,
+            'deepseek': false,
+            'other': false
+        };
+
+        function toggleGroupCollapse(groupKey) {
+            collapsedGroups[groupKey] = !collapsedGroups[groupKey];
+            renderDropdownOptions();
+        }
 
         async function fetchIp() {
             try {
@@ -1488,6 +1550,68 @@
             }
         }
 
+        // Classify model into user's requested groups
+        function getModelGroupKey(m) {
+            const modelId = m.id.toLowerCase();
+            const provider = (m.provider || '').toLowerCase();
+            
+            // Free Models
+            const freeIds = ['gpt-4o-mini', 'gpt-image-1-mini', 'gpt-4o-mini-tts', 'tts-1', 'claude-haiku-4-5'];
+            if (freeIds.includes(m.id)) {
+                return 'free';
+            }
+            
+            // DeepSeek
+            if (provider === 'deepseek' || modelId.includes('deepseek')) {
+                return 'deepseek';
+            }
+            
+            // xAI / Grok
+            if (provider === 'xai' || modelId.includes('grok')) {
+                return 'xai';
+            }
+            
+            // Anthropic / Claude
+            if (provider === 'anthropic' || modelId.includes('claude')) {
+                return 'anthropic';
+            }
+            
+            // ChatGPT / OpenAI
+            if (provider === 'openai' || modelId.includes('gpt') || modelId.includes('dall-e') || modelId.includes('tts') || modelId.includes('o1') || modelId.includes('o3')) {
+                return 'chatgpt';
+            }
+            
+            // Other (Gemini, Llama, etc.)
+            return 'other';
+        }
+
+        // Create a collapsible group header element
+        function createGroupHeader(groupKey, titleText) {
+            const titleDiv = document.createElement('div');
+            titleDiv.className = 'dropdown-group-title';
+            
+            const labelSpan = document.createElement('span');
+            labelSpan.innerText = titleText;
+            titleDiv.appendChild(labelSpan);
+            
+            // Create SVG Chevron indicator
+            const chevronSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            chevronSvg.setAttribute('class', 'group-chevron-icon');
+            chevronSvg.setAttribute('viewBox', '0 0 24 24');
+            chevronSvg.setAttribute('fill', 'none');
+            chevronSvg.setAttribute('stroke', 'currentColor');
+            chevronSvg.setAttribute('stroke-width', '2.5');
+            chevronSvg.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />`;
+            titleDiv.appendChild(chevronSvg);
+            
+            titleDiv.addEventListener('click', (e) => {
+                e.stopPropagation(); // prevent menu closing
+                toggleGroupCollapse(groupKey);
+            });
+            
+            return titleDiv;
+        }
+
         // Create a single dropdown option element
         function createOptionElement(m) {
             const isSelected = (currentModel === m.id);
@@ -1566,6 +1690,7 @@
             
             const query = document.getElementById('dropdown-search').value.trim().toLowerCase();
             const favs = getFavorites();
+            const isSearching = (query.length > 0);
             
             dropdownOptionsContainer.innerHTML = '';
             
@@ -1578,11 +1703,11 @@
             if (favoriteList.length > 0) {
                 const groupDiv = document.createElement('div');
                 groupDiv.className = 'dropdown-group';
+                if (collapsedGroups['favorites'] && !isSearching) {
+                    groupDiv.classList.add('collapsed');
+                }
                 
-                const titleDiv = document.createElement('div');
-                titleDiv.className = 'dropdown-group-title';
-                titleDiv.innerText = '⭐ Favorites';
-                groupDiv.appendChild(titleDiv);
+                groupDiv.appendChild(createGroupHeader('favorites', '⭐ Favorites'));
                 
                 favoriteList.forEach(m => {
                     groupDiv.appendChild(createOptionElement(m));
@@ -1595,11 +1720,11 @@
             if (featuredList.length > 0) {
                 const groupDiv = document.createElement('div');
                 groupDiv.className = 'dropdown-group';
+                if (collapsedGroups['featured'] && !isSearching) {
+                    groupDiv.classList.add('collapsed');
+                }
                 
-                const titleDiv = document.createElement('div');
-                titleDiv.className = 'dropdown-group-title';
-                titleDiv.innerText = '⭐ Featured Models';
-                groupDiv.appendChild(titleDiv);
+                groupDiv.appendChild(createGroupHeader('featured', '⭐ Featured Models'));
                 
                 featuredList.forEach(m => {
                     groupDiv.appendChild(createOptionElement(m));
@@ -1607,79 +1732,32 @@
                 dropdownOptionsContainer.appendChild(groupDiv);
             }
             
-            // 3. Category Groups
-            const groups = {
-                'anthropic': { title: 'Anthropic (Claude)', models: [] },
-                'openai': { title: 'OpenAI (GPT)', models: [] },
-                'image': { title: 'Image Generation', models: [] },
-                'tts': { title: 'Text-to-Speech', models: [] }
+            // 3. User Requested Collapsible Categories
+            const categories = {
+                'free': { title: 'Free Models', models: [] },
+                'anthropic': { title: 'Anthropic', models: [] },
+                'xai': { title: 'xAI', models: [] },
+                'chatgpt': { title: 'ChatGPT', models: [] },
+                'deepseek': { title: 'DeepSeek', models: [] },
+                'other': { title: 'Other Models', models: [] }
             };
             
-            const otherGroups = {};
-            
             filteredModels.forEach(m => {
-                if (m.category === 'image') {
-                    groups['image'].models.push(m);
-                } else if (m.category === 'tts') {
-                    groups['tts'].models.push(m);
-                } else {
-                    const provider = (m.provider || '').toLowerCase();
-                    if (provider === 'anthropic' || m.id.toLowerCase().includes('claude')) {
-                        groups['anthropic'].models.push(m);
-                    } else if (provider === 'openai' || m.id.toLowerCase().includes('gpt') || m.id.toLowerCase().includes('o1') || m.id.toLowerCase().includes('o3')) {
-                        groups['openai'].models.push(m);
-                    } else {
-                        let groupKey = provider || 'other';
-                        let groupTitle = m.provider ? m.provider.charAt(0).toUpperCase() + m.provider.slice(1) : 'Other Models';
-                        
-                        if (m.id.toLowerCase().includes('gemini') || m.name.toLowerCase().includes('gemini')) {
-                            groupKey = 'google';
-                            groupTitle = 'Google (Gemini)';
-                        } else if (m.id.toLowerCase().includes('llama') || m.name.toLowerCase().includes('llama')) {
-                            groupKey = 'meta';
-                            groupTitle = 'Meta (Llama)';
-                        } else if (m.id.toLowerCase().includes('deepseek') || m.name.toLowerCase().includes('deepseek')) {
-                            groupKey = 'deepseek';
-                            groupTitle = 'DeepSeek';
-                        }
-                        
-                        if (!otherGroups[groupKey]) {
-                            otherGroups[groupKey] = { title: groupTitle, models: [] };
-                        }
-                        otherGroups[groupKey].models.push(m);
+                const groupKey = getModelGroupKey(m);
+                categories[groupKey].models.push(m);
+            });
+            
+            const renderKeys = ['free', 'anthropic', 'xai', 'chatgpt', 'deepseek', 'other'];
+            renderKeys.forEach(key => {
+                const grp = categories[key];
+                if (grp.models.length > 0) {
+                    const groupDiv = document.createElement('div');
+                    groupDiv.className = 'dropdown-group';
+                    if (collapsedGroups[key] && !isSearching) {
+                        groupDiv.classList.add('collapsed');
                     }
-                }
-            });
-            
-            const keys = ['anthropic', 'openai', 'image', 'tts'];
-            keys.forEach(key => {
-                const grp = groups[key];
-                if (grp.models.length > 0) {
-                    const groupDiv = document.createElement('div');
-                    groupDiv.className = 'dropdown-group';
                     
-                    const titleDiv = document.createElement('div');
-                    titleDiv.className = 'dropdown-group-title';
-                    titleDiv.innerText = grp.title;
-                    groupDiv.appendChild(titleDiv);
-                    
-                    grp.models.forEach(m => {
-                        groupDiv.appendChild(createOptionElement(m));
-                    });
-                    dropdownOptionsContainer.appendChild(groupDiv);
-                }
-            });
-            
-            Object.keys(otherGroups).forEach(key => {
-                const grp = otherGroups[key];
-                if (grp.models.length > 0) {
-                    const groupDiv = document.createElement('div');
-                    groupDiv.className = 'dropdown-group';
-                    
-                    const titleDiv = document.createElement('div');
-                    titleDiv.className = 'dropdown-group-title';
-                    titleDiv.innerText = grp.title;
-                    groupDiv.appendChild(titleDiv);
+                    groupDiv.appendChild(createGroupHeader(key, grp.title));
                     
                     grp.models.forEach(m => {
                         groupDiv.appendChild(createOptionElement(m));
