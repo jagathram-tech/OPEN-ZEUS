@@ -1157,10 +1157,540 @@
             width: 20px;
             height: 20px;
         }
+
+        /* ============================================================
+           GITHUB PANEL STYLES
+        ============================================================ */
+
+        /* Page wrapper for side-by-side layout */
+        .page-wrapper {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* GitHub Connect Button in header */
+        .github-connect-btn {
+            background-color: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            white-space: nowrap;
+        }
+        .github-connect-btn:hover {
+            background-color: #f8fafc;
+            border-color: #1a1a2e;
+            color: #1a1a2e;
+        }
+        .github-connect-btn.connected {
+            background-color: #f0fdf4;
+            border-color: #22c55e;
+            color: #16a34a;
+        }
+        .github-connect-btn.connected:hover {
+            background-color: #fef2f2;
+            border-color: #f87171;
+            color: #dc2626;
+        }
+        .github-connect-btn svg {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+
+        /* Sidebar panel */
+        .github-panel {
+            width: 0;
+            min-width: 0;
+            height: 100vh;
+            background: #0d1117;
+            border-left: 1px solid #30363d;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), min-width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            flex-shrink: 0;
+            position: relative;
+        }
+        .github-panel.open {
+            width: 360px;
+            min-width: 360px;
+        }
+
+        /* Panel header */
+        .gh-panel-header {
+            padding: 14px 16px;
+            border-bottom: 1px solid #30363d;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #161b22;
+            flex-shrink: 0;
+        }
+        .gh-panel-header-icon {
+            color: #f0f6fc;
+            display: flex;
+            align-items: center;
+        }
+        .gh-panel-header-icon svg {
+            width: 20px;
+            height: 20px;
+        }
+        .gh-panel-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #f0f6fc;
+            flex: 1;
+        }
+        .gh-panel-close {
+            background: none;
+            border: none;
+            color: #8b949e;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            transition: color 0.15s ease, background 0.15s ease;
+        }
+        .gh-panel-close:hover {
+            color: #f0f6fc;
+            background: #30363d;
+        }
+        .gh-panel-close svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Panel body scroll area */
+        .gh-panel-body {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .gh-panel-body::-webkit-scrollbar { width: 4px; }
+        .gh-panel-body::-webkit-scrollbar-track { background: transparent; }
+        .gh-panel-body::-webkit-scrollbar-thumb { background: #30363d; border-radius: 10px; }
+
+        /* Connect view (when not logged in) */
+        .gh-connect-view {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 24px;
+            text-align: center;
+            gap: 16px;
+            flex: 1;
+        }
+        .gh-connect-icon {
+            width: 56px;
+            height: 56px;
+            background: #21262d;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #f0f6fc;
+        }
+        .gh-connect-icon svg { width: 28px; height: 28px; }
+        .gh-connect-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #f0f6fc;
+        }
+        .gh-connect-desc {
+            font-size: 0.8rem;
+            color: #8b949e;
+            line-height: 1.5;
+        }
+        .gh-oauth-btn {
+            background: #238636;
+            color: #ffffff;
+            border: 1px solid #2ea043;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+            transition: all 0.2s ease;
+            margin-top: 8px;
+        }
+        .gh-oauth-btn:hover {
+            background: #2ea043;
+            border-color: #3fb950;
+        }
+        .gh-oauth-btn svg { width: 18px; height: 18px; }
+
+        /* User info bar */
+        .gh-user-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            flex-shrink: 0;
+        }
+        .gh-user-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+        .gh-user-name {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #f0f6fc;
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .gh-disconnect-btn {
+            background: none;
+            border: 1px solid #30363d;
+            color: #8b949e;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+        }
+        .gh-disconnect-btn:hover {
+            background: #21262d;
+            color: #f0f6fc;
+            border-color: #6e7681;
+        }
+
+        /* Section headers inside panel */
+        .gh-section-header {
+            padding: 10px 16px 6px;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: #8b949e;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+        .gh-section-header button {
+            background: none;
+            border: none;
+            color: #58a6ff;
+            font-size: 0.7rem;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 600;
+            padding: 0;
+        }
+        .gh-section-header button:hover { color: #79c0ff; }
+
+        /* Repo search */
+        .gh-repo-search-wrap {
+            padding: 8px 16px;
+            flex-shrink: 0;
+        }
+        .gh-repo-search {
+            width: 100%;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #f0f6fc;
+            font-size: 0.8rem;
+            padding: 7px 12px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.15s ease;
+        }
+        .gh-repo-search:focus { border-color: #58a6ff; }
+        .gh-repo-search::placeholder { color: #6e7681; }
+
+        /* Repo list */
+        .gh-repo-list {
+            flex-shrink: 0;
+            border-bottom: 1px solid #21262d;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .gh-repo-list::-webkit-scrollbar { width: 4px; }
+        .gh-repo-list::-webkit-scrollbar-thumb { background: #30363d; border-radius: 10px; }
+        .gh-repo-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: background 0.15s ease;
+            border-bottom: 1px solid #21262d;
+        }
+        .gh-repo-item:last-child { border-bottom: none; }
+        .gh-repo-item:hover { background: #21262d; }
+        .gh-repo-item.active { background: #1f3a5f; }
+        .gh-repo-item-icon { color: #8b949e; flex-shrink: 0; }
+        .gh-repo-item-icon svg { width: 14px; height: 14px; }
+        .gh-repo-item-name {
+            font-size: 0.8rem;
+            color: #58a6ff;
+            font-weight: 500;
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .gh-repo-item-private {
+            font-size: 0.65rem;
+            color: #8b949e;
+            background: #21262d;
+            border: 1px solid #30363d;
+            border-radius: 4px;
+            padding: 1px 5px;
+            flex-shrink: 0;
+        }
+
+        /* File tree */
+        .gh-file-tree {
+            flex: 1;
+            padding: 4px 0;
+            min-height: 80px;
+        }
+        .gh-tree-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 16px;
+            cursor: pointer;
+            font-size: 0.78rem;
+            color: #c9d1d9;
+            transition: background 0.1s ease;
+            user-select: none;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+        .gh-tree-item:hover { background: #21262d; }
+        .gh-tree-item.selected { background: #1f3a5f; color: #79c0ff; }
+        .gh-tree-item.is-dir { color: #79c0ff; font-weight: 500; }
+        .gh-tree-item svg { width: 14px; height: 14px; flex-shrink: 0; }
+        .gh-tree-item .item-name {
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Status bar inside panel */
+        .gh-status-bar {
+            padding: 8px 16px;
+            font-size: 0.72rem;
+            color: #8b949e;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border-top: 1px solid #21262d;
+            flex-shrink: 0;
+        }
+        .gh-status-bar.loading { color: #58a6ff; }
+        .gh-status-bar.success { color: #3fb950; }
+        .gh-status-bar.error { color: #f85149; }
+        .gh-spinner {
+            width: 12px;
+            height: 12px;
+            border: 2px solid #30363d;
+            border-top-color: #58a6ff;
+            border-radius: 50%;
+            animation: gh-spin 0.7s linear infinite;
+            flex-shrink: 0;
+        }
+        @keyframes gh-spin { to { transform: rotate(360deg); } }
+
+        /* File editor area */
+        .gh-editor-wrap {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            border-top: 1px solid #21262d;
+            min-height: 0;
+        }
+        .gh-editor-file-bar {
+            padding: 8px 16px;
+            font-size: 0.75rem;
+            color: #8b949e;
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            font-family: var(--font-mono);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+        .gh-editor-file-bar span {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .gh-editor-file-bar .gh-file-modified {
+            color: #f0a500;
+            flex-shrink: 0;
+            font-size: 0.65rem;
+            background: rgba(240,165,0,0.1);
+            border: 1px solid rgba(240,165,0,0.3);
+            border-radius: 4px;
+            padding: 1px 6px;
+        }
+        .gh-editor-textarea {
+            flex: 1;
+            background: #0d1117;
+            color: #c9d1d9;
+            border: none;
+            outline: none;
+            resize: none;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            line-height: 1.6;
+            padding: 12px 16px;
+            overflow-y: auto;
+            tab-size: 2;
+        }
+        .gh-editor-textarea::-webkit-scrollbar { width: 4px; }
+        .gh-editor-textarea::-webkit-scrollbar-thumb { background: #30363d; border-radius: 10px; }
+
+        /* Commit bar */
+        .gh-commit-bar {
+            padding: 10px 16px;
+            border-top: 1px solid #30363d;
+            background: #161b22;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .gh-commit-input {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #f0f6fc;
+            font-size: 0.78rem;
+            padding: 7px 12px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.15s ease;
+            width: 100%;
+        }
+        .gh-commit-input:focus { border-color: #58a6ff; }
+        .gh-commit-input::placeholder { color: #6e7681; }
+        .gh-commit-btn {
+            background: #238636;
+            color: #ffffff;
+            border: 1px solid #2ea043;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            width: 100%;
+        }
+        .gh-commit-btn:hover:not(:disabled) {
+            background: #2ea043;
+            border-color: #3fb950;
+        }
+        .gh-commit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .gh-commit-btn svg { width: 14px; height: 14px; }
+
+        /* Codebase fetch progress */
+        .gh-fetch-progress {
+            padding: 8px 16px;
+            font-size: 0.72rem;
+            color: #58a6ff;
+            display: none;
+            align-items: center;
+            gap: 6px;
+            border-top: 1px solid #21262d;
+            flex-shrink: 0;
+        }
+        .gh-fetch-progress.visible { display: flex; }
+
+        /* AI context badge */
+        .gh-context-badge {
+            display: none;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 16px;
+            font-size: 0.7rem;
+            color: #3fb950;
+            background: rgba(63, 185, 80, 0.07);
+            border-top: 1px solid rgba(63, 185, 80, 0.2);
+            flex-shrink: 0;
+        }
+        .gh-context-badge.visible { display: flex; }
+        .gh-context-badge svg { width: 12px; height: 12px; flex-shrink: 0; }
+        .gh-context-badge span { line-height: 1.3; }
+
+        /* Empty states */
+        .gh-empty-state {
+            padding: 24px 16px;
+            text-align: center;
+            font-size: 0.78rem;
+            color: #6e7681;
+        }
+
+        /* Loading overlay for tree */
+        .gh-tree-loading {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            padding: 16px;
+            color: #58a6ff;
+            font-size: 0.78rem;
+        }
+        .gh-tree-loading.visible { display: flex; }
+
+        /* Responsive: on smaller screens collapse panel completely */
+        @media (max-width: 768px) {
+            .github-panel.open {
+                position: fixed;
+                right: 0;
+                top: 0;
+                z-index: 200;
+                width: 100vw;
+                min-width: unset;
+                box-shadow: -4px 0 24px rgba(0,0,0,0.5);
+            }
+        }
     </style>
 </head>
 <body>
 
+<div class="page-wrapper">
     <div class="app-container">
         <!-- Header -->
         <header class="chat-header">
@@ -1252,6 +1782,14 @@
                     </svg>
                     Clear Chat
                 </button>
+
+                <!-- GitHub Connect Button -->
+                <button type="button" class="github-connect-btn" id="github-connect-btn" title="Connect GitHub" onclick="toggleGithubPanel()">
+                    <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                    <span id="github-btn-label">GitHub</span>
+                </button>
             </div>
         </header>
 
@@ -1310,19 +1848,148 @@
                     </button>
                 </form>
             </div>
-            <div class="footer-note">Free Claude and GPT access powered by Puter.js</div>
+            <div class="footer-note">Powered by Puter.js · AI models by Anthropic, OpenAI, xAI, Google &amp; more</div>
         </footer>
     </div>
 
+    <!-- ========== GITHUB SIDEBAR PANEL ========== -->
+    <aside class="github-panel" id="github-panel">
+
+        <!-- Panel Header -->
+        <div class="gh-panel-header">
+            <div class="gh-panel-header-icon">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+                </svg>
+            </div>
+            <span class="gh-panel-title">GitHub</span>
+            <button class="gh-panel-close" onclick="toggleGithubPanel()" title="Close panel">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Panel Body -->
+        <div class="gh-panel-body" id="gh-panel-body">
+
+            <!-- NOT LOGGED IN VIEW -->
+            <div class="gh-connect-view" id="gh-connect-view">
+                <div class="gh-connect-icon">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                </div>
+                <div class="gh-connect-title">Connect GitHub</div>
+                <div class="gh-connect-desc">Connect your GitHub account to browse repos, edit files, and give the AI full codebase context.</div>
+                <button class="gh-oauth-btn" id="gh-oauth-btn" onclick="connectGitHub()">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                    Authorize with GitHub
+                </button>
+            </div>
+
+            <!-- LOGGED IN VIEW (hidden until authed) -->
+            <div id="gh-logged-in-view" style="display:none; flex-direction:column; flex:1;">
+
+                <!-- User bar -->
+                <div class="gh-user-bar" id="gh-user-bar">
+                    <img class="gh-user-avatar" id="gh-user-avatar" src="" alt="avatar">
+                    <span class="gh-user-name" id="gh-user-name">GitHub User</span>
+                    <button class="gh-disconnect-btn" onclick="disconnectGitHub()">Disconnect</button>
+                </div>
+
+                <!-- Repos section -->
+                <div class="gh-section-header">
+                    <span>Repositories</span>
+                    <button onclick="loadRepos()" id="gh-reload-repos-btn">↻ Refresh</button>
+                </div>
+                <div class="gh-repo-search-wrap">
+                    <input type="text" class="gh-repo-search" id="gh-repo-search" placeholder="Search repos..." oninput="filterRepos(this.value)">
+                </div>
+                <div class="gh-repo-list" id="gh-repo-list">
+                    <div class="gh-empty-state">Loading repos...</div>
+                </div>
+
+                <!-- File tree section -->
+                <div class="gh-section-header" id="gh-tree-section-header" style="display:none;">
+                    <span id="gh-tree-section-label">Files</span>
+                    <button onclick="collapseAllTree()">Collapse</button>
+                </div>
+                <div class="gh-tree-loading" id="gh-tree-loading">
+                    <div class="gh-spinner"></div>
+                    <span id="gh-tree-loading-text">Loading file tree...</span>
+                </div>
+                <div class="gh-file-tree" id="gh-file-tree"></div>
+
+                <!-- Fetch codebase progress -->
+                <div class="gh-fetch-progress" id="gh-fetch-progress">
+                    <div class="gh-spinner"></div>
+                    <span id="gh-fetch-progress-text">Fetching codebase for AI context...</span>
+                </div>
+
+                <!-- AI context badge -->
+                <div class="gh-context-badge" id="gh-context-badge">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                    <span id="gh-context-badge-text">AI has full codebase context</span>
+                </div>
+
+                <!-- File editor -->
+                <div class="gh-editor-wrap" id="gh-editor-wrap" style="display:none;">
+                    <div class="gh-editor-file-bar">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px;height:13px;color:#8b949e;flex-shrink:0">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                        </svg>
+                        <span id="gh-editor-filename">No file selected</span>
+                        <span class="gh-file-modified" id="gh-file-modified" style="display:none;">Modified</span>
+                    </div>
+                    <textarea class="gh-editor-textarea" id="gh-editor-textarea" spellcheck="false" oninput="onEditorInput()"></textarea>
+                    <div class="gh-commit-bar">
+                        <input type="text" class="gh-commit-input" id="gh-commit-input" placeholder="Commit message..." value="Update via open-Zeus">
+                        <button class="gh-commit-btn" id="gh-commit-btn" onclick="commitCurrentFile()" disabled>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                            </svg>
+                            Commit to GitHub
+                        </button>
+                    </div>
+                </div>
+
+            </div><!-- /gh-logged-in-view -->
+
+        </div><!-- /gh-panel-body -->
+
+        <!-- Status bar at bottom of panel -->
+        <div class="gh-status-bar" id="gh-status-bar">Ready</div>
+
+    </aside><!-- /github-panel -->
+
+</div><!-- /page-wrapper -->
+
     <script>        // State variables
-        const systemPrompt = "You are a helpful, friendly assistant. Be concise and clear.";
+        const BASE_SYSTEM_PROMPT = "You are a helpful, friendly assistant. Be concise and clear in your answers.";
+        const systemPrompt = BASE_SYSTEM_PROMPT; // kept for clearChat compat
         let history = [
-            { role: 'system', content: systemPrompt }
+            { role: 'system', content: BASE_SYSTEM_PROMPT }
         ];
         let isWaiting = false;
         let currentModel = 'claude-sonnet-4-6';
         let selectedImageBase64 = null;
         let isWebSearchEnabled = false;
+
+        // GitHub Panel State
+        let ghToken = null;
+        let ghUser = null;
+        let ghRepos = [];
+        let ghActiveRepo = null;  // { owner, name, branch, defaultBranch }
+        let ghFileTree = [];      // flat array of tree items from GitHub API
+        let ghExpandedDirs = {};  // path -> bool
+        let ghCodebaseMap = {};   // { filepath: content } for active repo
+        let ghSelectedFile = null; // { path, sha, originalContent }
+        let ghFileModified = false;
         
         // These will be populated dynamically, initialized with fallback sets
         const imageModels = ['gpt-image-2', 'gpt-image-1.5', 'gpt-image-1-mini', 'gpt-image-1', 'dall-e-3', 'dall-e-2'];
@@ -1395,7 +2062,7 @@
         const collapsedGroups = {
             'favorites': true,
             'featured': true,
-            'free': true,
+            'essential': true,
             'anthropic': true,
             'xai': true,
             'chatgpt': true,
@@ -1555,11 +2222,7 @@
             const modelId = m.id.toLowerCase();
             const provider = (m.provider || '').toLowerCase();
             
-            // Free Models
-            const freeIds = ['gpt-4o-mini', 'gpt-image-1-mini', 'gpt-4o-mini-tts', 'tts-1', 'claude-haiku-4-5'];
-            if (freeIds.includes(m.id)) {
-                return 'free';
-            }
+
             
             // DeepSeek
             if (provider === 'deepseek' || modelId.includes('deepseek')) {
@@ -1727,9 +2390,7 @@
                 const matchesSearch = m.name.toLowerCase().includes(query) || m.id.toLowerCase().includes(query);
                 
                 // Smart search keyword expansions
-                if (query === 'free' && groupKey === 'free') {
-                    return true;
-                }
+
                 if ((query === 'anthropic' || query === 'claude') && groupKey === 'anthropic') {
                     return true;
                 }
@@ -1785,7 +2446,7 @@
             
             // 3. User Requested Collapsible Categories
             const categories = {
-                'free': { title: 'Free Models', models: [] },
+                'essential': { title: 'Essential Models', models: [] },
                 'anthropic': { title: 'Anthropic', models: [] },
                 'xai': { title: 'xAI', models: [] },
                 'chatgpt': { title: 'ChatGPT', models: [] },
@@ -1798,7 +2459,7 @@
                 categories[groupKey].models.push(m);
             });
             
-            const renderKeys = ['free', 'anthropic', 'xai', 'chatgpt', 'deepseek', 'other'];
+            const renderKeys = ['essential', 'anthropic', 'xai', 'chatgpt', 'deepseek', 'other'];
             renderKeys.forEach(key => {
                 const grp = categories[key];
                 if (grp.models.length > 0) {
@@ -2428,7 +3089,7 @@
             if (confirm("Are you sure you want to clear the conversation?")) {
                 // Reset history
                 history = [
-                    { role: 'system', content: systemPrompt }
+                    { role: 'system', content: getActiveSystemPrompt() }
                 ];
                 
                 // Reset UI: remove all messages and restore welcome screen
@@ -2438,6 +3099,555 @@
                 setWaitingState(false);
             }
         }
+
+        /* ================================================================
+           GITHUB PANEL — ALL LOGIC
+        ================================================================ */
+
+        // ─── Helpers ─────────────────────────────────────────────────────
+
+        function getActiveSystemPrompt() {
+            if (!ghActiveRepo || Object.keys(ghCodebaseMap).length === 0) {
+                return BASE_SYSTEM_PROMPT;
+            }
+            const { owner, name } = ghActiveRepo;
+            let ctx = `${BASE_SYSTEM_PROMPT}\n\nThe user has connected the GitHub repo: ${owner}/${name}\n\nFull codebase:\n\n`;
+            for (const [path, content] of Object.entries(ghCodebaseMap)) {
+                ctx += `File: ${path}\n\`\`\`\n${content}\n\`\`\`\n\n`;
+            }
+            return ctx;
+        }
+
+        function ghSetStatus(msg, type = '') {
+            const bar = document.getElementById('gh-status-bar');
+            if (!bar) return;
+            bar.textContent = msg;
+            bar.className = 'gh-status-bar' + (type ? ' ' + type : '');
+        }
+
+        const BINARY_EXTS = new Set(['.png','.jpg','.jpeg','.gif','.svg','.ico','.webp',
+            '.woff','.woff2','.ttf','.eot','.otf','.pdf','.zip','.tar','.gz','.rar',
+            '.exe','.dll','.so','.dylib','.bin','.dmg','.pkg','.deb','.rpm',
+            '.mp3','.mp4','.wav','.ogg','.flac','.avi','.mkv','.mov']);
+        const SKIP_DIRS = new Set(['node_modules','.git','dist','build','.next','__pycache__',
+            '.cache','.parcel-cache','vendor','coverage','.nyc_output']);
+
+        function isBinaryPath(path) {
+            const ext = '.' + path.split('.').pop().toLowerCase();
+            return BINARY_EXTS.has(ext);
+        }
+        function isSkippedDir(path) {
+            return path.split('/').some(part => SKIP_DIRS.has(part));
+        }
+
+        // ─── OAuth / Auth ────────────────────────────────────────────────
+
+        function connectGitHub() {
+            window.location.href = '/api/auth/github';
+        }
+
+        function disconnectGitHub() {
+            ghToken = null;
+            ghUser = null;
+            ghRepos = [];
+            ghActiveRepo = null;
+            ghFileTree = [];
+            ghCodebaseMap = {};
+            ghSelectedFile = null;
+            localStorage.removeItem('gh_token');
+            renderGhPanel();
+            // Reset AI context to base
+            history[0] = { role: 'system', content: BASE_SYSTEM_PROMPT };
+            ghSetStatus('Disconnected from GitHub');
+        }
+
+        async function initGithubFromToken(token) {
+            ghToken = token;
+            ghSetStatus('Fetching GitHub profile...', 'loading');
+            try {
+                const res = await fetch('https://api.github.com/user', {
+                    headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github+json' }
+                });
+                if (!res.ok) throw new Error('Token invalid or expired');
+                ghUser = await res.json();
+                localStorage.setItem('gh_token', token);
+                renderGhPanel();
+                await loadRepos();
+            } catch (e) {
+                ghToken = null;
+                localStorage.removeItem('gh_token');
+                ghSetStatus('Auth failed: ' + e.message, 'error');
+                renderGhPanel();
+            }
+        }
+
+        // ─── Panel toggle ────────────────────────────────────────────────
+
+        function toggleGithubPanel() {
+            const panel = document.getElementById('github-panel');
+            const btn = document.getElementById('github-connect-btn');
+            const label = document.getElementById('github-btn-label');
+            if (!panel) return;
+            const isOpen = panel.classList.toggle('open');
+            if (isOpen) {
+                label.textContent = ghUser ? ghUser.login : 'GitHub';
+                btn.classList.toggle('connected', !!ghUser);
+            } else {
+                label.textContent = 'GitHub';
+                btn.classList.remove('connected');
+            }
+        }
+
+        // ─── Render panel state ──────────────────────────────────────────
+
+        function renderGhPanel() {
+            const connectView = document.getElementById('gh-connect-view');
+            const loggedInView = document.getElementById('gh-logged-in-view');
+            const btn = document.getElementById('github-connect-btn');
+            const label = document.getElementById('github-btn-label');
+
+            if (ghUser) {
+                connectView.style.display = 'none';
+                loggedInView.style.display = 'flex';
+                document.getElementById('gh-user-name').textContent = ghUser.login;
+                document.getElementById('gh-user-avatar').src = ghUser.avatar_url;
+                btn.classList.add('connected');
+                label.textContent = ghUser.login;
+            } else {
+                connectView.style.display = 'flex';
+                loggedInView.style.display = 'none';
+                btn.classList.remove('connected');
+                label.textContent = 'GitHub';
+            }
+        }
+
+        // ─── Repo loading ────────────────────────────────────────────────
+
+        async function loadRepos() {
+            if (!ghToken) return;
+            const list = document.getElementById('gh-repo-list');
+            list.innerHTML = '<div class="gh-empty-state">Loading...</div>';
+            ghSetStatus('Loading repositories...', 'loading');
+            try {
+                let allRepos = [];
+                let page = 1;
+                while (true) {
+                    const res = await fetch(
+                        `https://api.github.com/user/repos?per_page=100&page=${page}&sort=pushed&affiliation=owner,collaborator`,
+                        { headers: { Authorization: `token ${ghToken}`, Accept: 'application/vnd.github+json' } }
+                    );
+                    if (!res.ok) throw new Error('Failed to fetch repos');
+                    const batch = await res.json();
+                    if (batch.length === 0) break;
+                    allRepos = allRepos.concat(batch);
+                    if (batch.length < 100) break;
+                    page++;
+                }
+                ghRepos = allRepos;
+                renderRepoList(ghRepos);
+                ghSetStatus(`${allRepos.length} repos loaded`, 'success');
+            } catch (e) {
+                list.innerHTML = `<div class="gh-empty-state">Error: ${e.message}</div>`;
+                ghSetStatus('Failed to load repos: ' + e.message, 'error');
+            }
+        }
+
+        function renderRepoList(repos) {
+            const list = document.getElementById('gh-repo-list');
+            if (repos.length === 0) {
+                list.innerHTML = '<div class="gh-empty-state">No repositories found</div>';
+                return;
+            }
+            list.innerHTML = repos.map(r => `
+                <div class="gh-repo-item${ghActiveRepo && ghActiveRepo.name === r.name && ghActiveRepo.owner === r.owner.login ? ' active' : ''}"
+                     onclick="selectRepo('${r.owner.login}','${r.name}','${r.default_branch}')">
+                    <div class="gh-repo-item-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
+                        </svg>
+                    </div>
+                    <span class="gh-repo-item-name">${r.name}</span>
+                    ${r.private ? '<span class="gh-repo-item-private">Private</span>' : ''}
+                </div>
+            `).join('');
+        }
+
+        function filterRepos(query) {
+            const q = query.toLowerCase();
+            const filtered = q ? ghRepos.filter(r => r.name.toLowerCase().includes(q) || r.full_name.toLowerCase().includes(q)) : ghRepos;
+            renderRepoList(filtered);
+        }
+
+        // ─── Repo selection & file tree ──────────────────────────────────
+
+        async function selectRepo(owner, name, branch) {
+            ghActiveRepo = { owner, name, branch, defaultBranch: branch };
+            ghSelectedFile = null;
+            ghCodebaseMap = {};
+            ghFileModified = false;
+
+            // Update repo list UI
+            renderRepoList(ghRepos);
+
+            // Show file tree section
+            document.getElementById('gh-tree-section-header').style.display = 'flex';
+            document.getElementById('gh-tree-section-label').textContent = `${owner}/${name}`;
+            document.getElementById('gh-editor-wrap').style.display = 'none';
+            document.getElementById('gh-context-badge').classList.remove('visible');
+
+            await loadFileTree(owner, name, branch);
+        }
+
+        async function loadFileTree(owner, name, branch) {
+            const loadingEl = document.getElementById('gh-tree-loading');
+            const treeEl = document.getElementById('gh-file-tree');
+            loadingEl.classList.add('visible');
+            loadingEl.querySelector('span').textContent = 'Loading file tree...';
+            treeEl.innerHTML = '';
+            ghSetStatus('Fetching file tree...', 'loading');
+
+            try {
+                // Get the branch SHA
+                const branchRes = await fetch(
+                    `https://api.github.com/repos/${owner}/${name}/branches/${branch}`,
+                    { headers: { Authorization: `token ${ghToken}`, Accept: 'application/vnd.github+json' } }
+                );
+                if (!branchRes.ok) throw new Error('Could not fetch branch info');
+                const branchData = await branchRes.json();
+                const treeSha = branchData.commit.commit.tree.sha;
+
+                // Fetch entire recursive tree
+                const treeRes = await fetch(
+                    `https://api.github.com/repos/${owner}/${name}/git/trees/${treeSha}?recursive=1`,
+                    { headers: { Authorization: `token ${ghToken}`, Accept: 'application/vnd.github+json' } }
+                );
+                if (!treeRes.ok) throw new Error('Could not fetch file tree');
+                const treeData = await treeRes.json();
+
+                ghFileTree = treeData.tree || [];
+                ghExpandedDirs = {};
+                renderFileTree();
+                loadingEl.classList.remove('visible');
+                ghSetStatus(`${ghFileTree.filter(i => i.type === 'blob').length} files found`, 'success');
+
+                // Start background codebase fetch
+                fetchFullCodebase(owner, name);
+
+            } catch (e) {
+                loadingEl.classList.remove('visible');
+                treeEl.innerHTML = `<div class="gh-empty-state">Error: ${e.message}</div>`;
+                ghSetStatus('Tree load failed: ' + e.message, 'error');
+            }
+        }
+
+        function renderFileTree() {
+            const treeEl = document.getElementById('gh-file-tree');
+            const blobs = ghFileTree.filter(i => i.type === 'blob' && !isSkippedDir(i.path));
+
+            // Build a unique sorted dir set
+            const dirs = new Set();
+            blobs.forEach(f => {
+                const parts = f.path.split('/');
+                for (let i = 1; i < parts.length; i++) {
+                    dirs.add(parts.slice(0, i).join('/'));
+                }
+            });
+
+            // Collect all items: dirs + files, sorted
+            let items = [];
+            dirs.forEach(d => items.push({ path: d, type: 'tree' }));
+            blobs.forEach(f => items.push(f));
+            items.sort((a, b) => {
+                const aDir = a.type === 'tree' ? 0 : 1;
+                const bDir = b.type === 'tree' ? 0 : 1;
+                if (aDir !== bDir) return aDir - bDir;
+                return a.path.localeCompare(b.path);
+            });
+
+            treeEl.innerHTML = '';
+            items.forEach(item => {
+                const parts = item.path.split('/');
+                const depth = parts.length - 1;
+                const name = parts[parts.length - 1];
+                const parentPath = parts.slice(0, depth).join('/');
+
+                // Hide items whose parent dir is collapsed
+                if (depth > 0 && ghExpandedDirs[parentPath] === false) return;
+                // Items under a non-expanded root dir
+                if (depth > 0 && ghExpandedDirs[parentPath] === undefined && depth > 0) {
+                    // default collapsed for depth > 0
+                    return;
+                }
+
+                const el = document.createElement('div');
+                el.className = 'gh-tree-item' + (item.type === 'tree' ? ' is-dir' : '') +
+                    (ghSelectedFile && ghSelectedFile.path === item.path ? ' selected' : '');
+                el.style.paddingLeft = (16 + depth * 14) + 'px';
+
+                if (item.type === 'tree') {
+                    const isExpanded = !!ghExpandedDirs[item.path];
+                    el.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="${isExpanded
+                                ? 'm19.5 8.25-7.5 7.5-7.5-7.5'
+                                : 'm8.25 4.5 7.5 7.5-7.5 7.5'}" />
+                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
+                        </svg>
+                        <span class="item-name">${name}</span>`;
+                    el.addEventListener('click', () => {
+                        ghExpandedDirs[item.path] = !ghExpandedDirs[item.path];
+                        renderFileTree();
+                    });
+                } else {
+                    el.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                        </svg>
+                        <span class="item-name">${name}</span>`;
+                    el.addEventListener('click', () => openFile(item));
+                }
+                treeEl.appendChild(el);
+            });
+
+            if (treeEl.children.length === 0) {
+                treeEl.innerHTML = '<div class="gh-empty-state">Empty repository</div>';
+            }
+        }
+
+        function collapseAllTree() {
+            ghExpandedDirs = {};
+            renderFileTree();
+        }
+
+        // ─── File open & editor ───────────────────────────────────────────
+
+        async function openFile(treeItem) {
+            if (isBinaryPath(treeItem.path)) {
+                ghSetStatus('Binary files cannot be edited', 'error');
+                return;
+            }
+            ghSetStatus('Loading file...', 'loading');
+            try {
+                const res = await fetch(
+                    `https://api.github.com/repos/${ghActiveRepo.owner}/${ghActiveRepo.name}/contents/${treeItem.path}`,
+                    { headers: { Authorization: `token ${ghToken}`, Accept: 'application/vnd.github+json' } }
+                );
+                if (!res.ok) throw new Error('Cannot fetch file');
+                const data = await res.json();
+                const content = atob(data.content.replace(/\n/g, ''));
+                ghSelectedFile = { path: treeItem.path, sha: data.sha, originalContent: content };
+                ghFileModified = false;
+
+                document.getElementById('gh-editor-wrap').style.display = 'flex';
+                document.getElementById('gh-editor-filename').textContent = treeItem.path;
+                document.getElementById('gh-editor-textarea').value = content;
+                document.getElementById('gh-file-modified').style.display = 'none';
+                document.getElementById('gh-commit-btn').disabled = true;
+
+                renderFileTree();
+                ghSetStatus('Opened: ' + treeItem.path, 'success');
+            } catch (e) {
+                ghSetStatus('Cannot open file: ' + e.message, 'error');
+            }
+        }
+
+        function onEditorInput() {
+            if (!ghSelectedFile) return;
+            const current = document.getElementById('gh-editor-textarea').value;
+            ghFileModified = current !== ghSelectedFile.originalContent;
+            document.getElementById('gh-file-modified').style.display = ghFileModified ? 'inline-flex' : 'none';
+            document.getElementById('gh-commit-btn').disabled = !ghFileModified;
+
+            // Also update the local codebase map in real-time
+            if (ghActiveRepo) {
+                ghCodebaseMap[ghSelectedFile.path] = current;
+                updateAIContext();
+            }
+        }
+
+        // ─── Full codebase fetch ─────────────────────────────────────────
+
+        async function fetchFullCodebase(owner, name) {
+            const progressEl = document.getElementById('gh-fetch-progress');
+            const progressText = document.getElementById('gh-fetch-progress-text');
+            const contextBadge = document.getElementById('gh-context-badge');
+            const contextText = document.getElementById('gh-context-badge-text');
+            progressEl.classList.add('visible');
+            contextBadge.classList.remove('visible');
+
+            const fetchableFiles = ghFileTree.filter(i =>
+                i.type === 'blob' &&
+                !isBinaryPath(i.path) &&
+                !isSkippedDir(i.path)
+            );
+
+            ghCodebaseMap = {};
+            let done = 0;
+            const total = fetchableFiles.length;
+            const BATCH = 8;
+
+            for (let i = 0; i < fetchableFiles.length; i += BATCH) {
+                // Abort if user switched repo
+                if (!ghActiveRepo || ghActiveRepo.owner !== owner || ghActiveRepo.name !== name) break;
+
+                const batch = fetchableFiles.slice(i, i + BATCH);
+                await Promise.all(batch.map(async (file) => {
+                    try {
+                        const res = await fetch(
+                            `https://api.github.com/repos/${owner}/${name}/contents/${file.path}`,
+                            { headers: { Authorization: `token ${ghToken}`, Accept: 'application/vnd.github+json' } }
+                        );
+                        if (!res.ok) return;
+                        const data = await res.json();
+                        if (data.content) {
+                            ghCodebaseMap[file.path] = atob(data.content.replace(/\n/g, ''));
+                        }
+                    } catch (_) { /* skip */ }
+                    done++;
+                    progressText.textContent = `Fetching codebase… ${done}/${total} files`;
+                }));
+            }
+
+            progressEl.classList.remove('visible');
+            const fileCount = Object.keys(ghCodebaseMap).length;
+            contextBadge.classList.add('visible');
+            contextText.textContent = `AI has full codebase context (${fileCount} files)`;
+            updateAIContext();
+            ghSetStatus(`Codebase loaded: ${fileCount} files`, 'success');
+        }
+
+        function updateAIContext() {
+            // Update system message in history with latest codebase
+            history[0] = { role: 'system', content: getActiveSystemPrompt() };
+        }
+
+        // ─── Commit file ─────────────────────────────────────────────────
+
+        async function commitCurrentFile() {
+            if (!ghSelectedFile || !ghActiveRepo || !ghToken) return;
+            const content = document.getElementById('gh-editor-textarea').value;
+            const message = document.getElementById('gh-commit-input').value.trim() || 'Update via open-Zeus';
+            const { owner, name, branch } = ghActiveRepo;
+            const path = ghSelectedFile.path;
+
+            document.getElementById('gh-commit-btn').disabled = true;
+            document.getElementById('gh-commit-btn').innerHTML = `
+                <div class="gh-spinner" style="border-top-color:#fff;"></div>
+                Committing...
+            `;
+            ghSetStatus('Committing...', 'loading');
+
+            try {
+                const body = {
+                    message,
+                    content: btoa(unescape(encodeURIComponent(content))),
+                    sha: ghSelectedFile.sha,
+                    branch
+                };
+                const res = await fetch(
+                    `https://api.github.com/repos/${owner}/${name}/contents/${path}`,
+                    {
+                        method: 'PUT',
+                        headers: {
+                            Authorization: `token ${ghToken}`,
+                            Accept: 'application/vnd.github+json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(body)
+                    }
+                );
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.message || 'Commit failed');
+                }
+                const data = await res.json();
+
+                // Update SHA to new commit sha
+                ghSelectedFile.sha = data.content.sha;
+                ghSelectedFile.originalContent = content;
+                ghCodebaseMap[path] = content;
+                ghFileModified = false;
+                updateAIContext();
+
+                document.getElementById('gh-file-modified').style.display = 'none';
+                document.getElementById('gh-commit-btn').disabled = true;
+                document.getElementById('gh-commit-btn').innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                    Commit to GitHub
+                `;
+                ghSetStatus(`Committed: ${path}`, 'success');
+            } catch (e) {
+                document.getElementById('gh-commit-btn').disabled = false;
+                document.getElementById('gh-commit-btn').innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                    Commit to GitHub
+                `;
+                ghSetStatus('Commit failed: ' + e.message, 'error');
+            }
+        }
+
+        // ─── On page load: check URL hash for OAuth token ────────────────
+
+        (function checkGhTokenOnLoad() {
+            const hash = window.location.hash;
+            let token = null;
+            let error = null;
+
+            if (hash.includes('gh_token=')) {
+                token = hash.split('gh_token=')[1].split('&')[0];
+            } else if (hash.includes('gh_error=')) {
+                error = decodeURIComponent(hash.split('gh_error=')[1].split('&')[0]);
+            }
+
+            // Clean URL
+            if (hash.includes('gh_token=') || hash.includes('gh_error=')) {
+                history.replaceState(null, '', window.location.pathname + window.location.search);
+            }
+
+            if (token) {
+                // Open panel automatically after OAuth
+                setTimeout(() => {
+                    const panel = document.getElementById('github-panel');
+                    if (panel && !panel.classList.contains('open')) panel.classList.add('open');
+                    initGithubFromToken(token);
+                }, 100);
+            } else if (error) {
+                ghSetStatus('GitHub auth error: ' + error, 'error');
+                setTimeout(() => {
+                    const panel = document.getElementById('github-panel');
+                    if (panel && !panel.classList.contains('open')) panel.classList.add('open');
+                }, 100);
+            } else {
+                // Check localStorage for saved token
+                const saved = localStorage.getItem('gh_token');
+                if (saved) {
+                    initGithubFromToken(saved);
+                }
+            }
+        })();
+
+        // Patch clearChat to also reset AI context
+        const _origClearChat = clearChat;
+        function clearChat() {
+            if (confirm("Are you sure you want to clear the conversation?")) {
+                history = [
+                    { role: 'system', content: getActiveSystemPrompt() }
+                ];
+                const messageArea = document.getElementById('message-area');
+                const welcomeScreen = document.getElementById('welcome-screen');
+                messageArea.innerHTML = '';
+                messageArea.appendChild(welcomeScreen);
+                document.getElementById('chat-input').value = '';
+                setWaitingState(false);
+            }
+        }
+
     </script>
 
     <!-- Lightbox Modal -->
