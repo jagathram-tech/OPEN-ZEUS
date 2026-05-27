@@ -6,6 +6,8 @@
     <title>open-Zeus</title>
     <!-- Puter.js SDK -->
     <script src="https://js.puter.com/v2/"></script>
+    <!-- PDF.js CDN for in-memory PDF reading -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <style>
         /* Google Fonts */
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
@@ -523,6 +525,350 @@
             border-color: #e2e8f0;
             cursor: not-allowed;
             opacity: 0.5;
+        }        /* App Layout Restructuring */
+        .main-chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+            background-color: var(--bg-chat);
+        }
+
+        /* Files Left Sidebar */
+        .files-sidebar {
+            width: 310px;
+            height: 100%;
+            background-color: #fafbfc;
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, border-right 0.3s ease;
+            overflow: hidden;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 50;
+        }
+
+        .files-sidebar.collapsed {
+            width: 0;
+            border-right: none;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .sidebar-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #ffffff;
+        }
+
+        .sidebar-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sidebar-title svg {
+            width: 18px;
+            height: 18px;
+            color: var(--primary);
+        }
+
+        .sidebar-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            gap: 20px;
+            overflow-y: auto;
+        }
+
+        /* Drag and Drop Zone */
+        .upload-zone {
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 24px 16px;
+            text-align: center;
+            background-color: #ffffff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+        }
+
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: var(--primary);
+            background-color: var(--primary-light);
+        }
+
+        .upload-zone svg {
+            width: 36px;
+            height: 36px;
+            color: var(--primary);
+            transition: transform 0.2s ease;
+        }
+
+        .upload-zone:hover svg {
+            transform: translateY(-2px);
+        }
+
+        .upload-zone-text {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .upload-zone-subtext {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* File List */
+        .file-list-title {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .sidebar-file-list {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow-y: auto;
+        }
+
+        .file-item {
+            background-color: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .file-item:hover {
+            border-color: #cbd5e1;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+        }
+
+        .file-item-checkbox {
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s ease;
+            outline: none;
+            flex-shrink: 0;
+        }
+
+        .file-item-checkbox:checked {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .file-item-checkbox:checked::after {
+            content: "";
+            width: 4px;
+            height: 8px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+            margin-bottom: 2px;
+        }
+
+        .file-item-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .file-item-icon.pdf {
+            background-color: #fef2f2;
+            color: #ef4444;
+        }
+
+        .file-item-icon.text {
+            background-color: #eff6ff;
+            color: #3b82f6;
+        }
+
+        .file-item-icon.image {
+            background-color: #f0fdf4;
+            color: #22c55e;
+        }
+
+        .file-item-icon.other {
+            background-color: #f5f3ff;
+            color: var(--primary);
+        }
+
+        .file-item-icon svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .file-item-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .file-item-name {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-main);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .file-item-size {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .file-delete-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 6px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .file-delete-btn:hover {
+            color: #ef4444;
+            background-color: #fef2f2;
+        }
+
+        .file-delete-btn svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        /* Sidebar Toggle Button styling */
+        .sidebar-toggle-btn {
+            background-color: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            position: relative;
+        }
+
+        .sidebar-toggle-btn:hover {
+            background-color: #f8fafc;
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .sidebar-toggle-btn.active {
+            background-color: var(--primary-light);
+            border-color: var(--primary);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .sidebar-toggle-btn svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .files-badge {
+            background-color: var(--primary);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 99px;
+            margin-left: 2px;
+            min-width: 16px;
+            height: 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Processing Loader overlay */
+        .sidebar-loader {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.8);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .sidebar-loader.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .sidebar-spinner {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s infinite linear;
+        }
+
+        .sidebar-loader-text {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
 
@@ -1162,8 +1508,46 @@
 <body>
 
     <div class="app-container">
-        <!-- Header -->
-        <header class="chat-header">
+        <!-- Files Left Sidebar -->
+        <aside class="files-sidebar collapsed" id="files-sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z" />
+                    </svg>
+                    <span>Files Panel</span>
+                </div>
+            </div>
+            <div class="sidebar-content">
+                <!-- In-memory Upload Zone -->
+                <div class="upload-zone" id="files-upload-zone">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5v-6.75m0 0 3-3-3 3m-3-3 3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z" />
+                    </svg>
+                    <div class="upload-zone-text">Upload context files</div>
+                    <div class="upload-zone-subtext">Click or drag files here</div>
+                    <div class="upload-zone-subtext" style="font-size: 0.65rem; color: var(--text-muted); font-style: italic;">PDF, images, txt, code, etc.</div>
+                    <input type="file" id="files-panel-input" multiple style="display: none;">
+                </div>
+                
+                <!-- File List Container -->
+                <div class="file-list-title" id="file-list-title" style="display: none;">Uploaded Files</div>
+                <div class="sidebar-file-list" id="sidebar-file-list">
+                    <!-- File items will be rendered dynamically -->
+                </div>
+            </div>
+            
+            <!-- In-progress Loader Overlay -->
+            <div class="sidebar-loader" id="sidebar-loader">
+                <div class="sidebar-spinner"></div>
+                <div class="sidebar-loader-text" id="sidebar-loader-text">Reading file...</div>
+            </div>
+        </aside>
+
+        <!-- Main Chat Container -->
+        <div class="main-chat-container">
+            <!-- Header -->
+            <header class="chat-header">
             <div class="bot-profile">
                 <div class="bot-avatar">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 24px; height: 24px;">
@@ -1239,6 +1623,15 @@
                     </div>
                 </div>
 
+                <!-- Files Panel Toggle Button -->
+                <button type="button" class="sidebar-toggle-btn" id="sidebar-toggle-btn" title="Toggle Files Panel">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z" />
+                    </svg>
+                    <span>Files Context</span>
+                    <span class="files-badge" id="files-badge" style="display: none;">0</span>
+                </button>
+
                 <!-- Web Search Toggle Button -->
                 <button type="button" class="web-search-toggle-btn" id="web-search-toggle-btn" title="Toggle Search the Web">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="globe-icon">
@@ -1312,10 +1705,266 @@
             </div>
             <div class="footer-note">Free Claude and GPT access powered by Puter.js</div>
         </footer>
+        </div>
     </div>
 
     <script>        // State variables
         const systemPrompt = "You are a helpful, friendly assistant. Be concise and clear.";
+        
+        // In-memory Temporary Files System State
+        const uploadedFiles = [];
+
+        // PDF.js worker setup
+        if (typeof pdfjsLib !== 'undefined') {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        }
+
+        // Toggle Files Sidebar Panel
+        function toggleFilesSidebar() {
+            const sidebar = document.getElementById('files-sidebar');
+            const toggleBtn = document.getElementById('sidebar-toggle-btn');
+            if (!sidebar || !toggleBtn) return;
+            
+            const isCollapsed = sidebar.classList.toggle('collapsed');
+            toggleBtn.classList.toggle('active', !isCollapsed);
+            
+            // Adjust input focus depending on state
+            if (!isCollapsed) {
+                document.getElementById('chat-input').focus();
+            }
+        }
+
+        // Show/Hide sidebar loading spinner
+        function showSidebarLoader(active, text = 'Reading file...') {
+            const loader = document.getElementById('sidebar-loader');
+            const loaderText = document.getElementById('sidebar-loader-text');
+            if (!loader) return;
+            
+            if (active) {
+                if (loaderText) loaderText.innerText = text;
+                loader.classList.add('active');
+            } else {
+                loader.classList.remove('active');
+            }
+        }
+
+        // Helper: Convert bytes to readable string
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        }
+
+        // Asynchronously extract text from a PDF file using PDF.js
+        async function extractTextFromPdf(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = async function(e) {
+                    try {
+                        const typedarray = new Uint8Array(e.target.result);
+                        
+                        if (typeof pdfjsLib === 'undefined') {
+                            throw new Error("PDF.js library is not loaded yet. Please wait or refresh.");
+                        }
+
+                        const pdf = await pdfjsLib.getDocument({ data: typedarray }).promise;
+                        let fullText = '';
+                        const totalPages = pdf.numPages;
+                        
+                        for (let i = 1; i <= totalPages; i++) {
+                            showSidebarLoader(true, `Reading PDF page ${i} of ${totalPages}...`);
+                            const page = await pdf.getPage(i);
+                            const textContent = await page.getTextContent();
+                            const pageText = textContent.items.map(item => item.str).join(' ');
+                            fullText += `--- Page ${i} ---\n${pageText}\n\n`;
+                        }
+                        
+                        resolve(fullText.trim());
+                    } catch (err) {
+                        reject(err);
+                    }
+                };
+                reader.onerror = err => reject(err);
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        // Process file based on extension and MIME type
+        async function processFile(file) {
+            const fileType = file.type.toLowerCase();
+            const fileName = file.name;
+            const fileExtension = fileName.substring(fileName.lastIndexOf('.')).toLowerCase();
+            
+            showSidebarLoader(true, `Reading ${fileName}...`);
+            
+            try {
+                let contentText = '';
+                let fileCategory = 'other';
+                
+                // Determine file type category and extract
+                if (fileType === 'application/pdf' || fileExtension === '.pdf') {
+                    fileCategory = 'pdf';
+                    contentText = await extractTextFromPdf(file);
+                } else if (fileType.startsWith('image/') || ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.bmp', '.svg'].includes(fileExtension)) {
+                    fileCategory = 'image';
+                    // Read image as base64
+                    contentText = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = (e) => resolve(e.target.result);
+                        reader.onerror = (err) => reject(err);
+                        reader.readAsDataURL(file);
+                    });
+                } else {
+                    // Treat as text/code file by default
+                    fileCategory = 'text';
+                    contentText = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = (e) => resolve(e.target.result);
+                        reader.onerror = (err) => reject(err);
+                        reader.readAsText(file);
+                    });
+                }
+                
+                // Save processed file to in-memory state
+                uploadedFiles.push({
+                    id: Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                    name: fileName,
+                    type: fileType || 'text/plain',
+                    category: fileCategory,
+                    size: file.size,
+                    content: contentText,
+                    selected: true
+                });
+                
+                renderFilesSidebar();
+            } catch (err) {
+                console.error("Error processing file:", err);
+                alert(`Failed to parse file "${fileName}": ` + err.message);
+            } finally {
+                showSidebarLoader(false);
+            }
+        }
+
+        // Render the Files Panel UI list
+        function renderFilesSidebar() {
+            const listContainer = document.getElementById('sidebar-file-list');
+            const listTitle = document.getElementById('file-list-title');
+            const badge = document.getElementById('files-badge');
+            
+            if (!listContainer || !listTitle) return;
+            
+            // Clear current list
+            listContainer.innerHTML = '';
+            
+            // Update badge in header
+            if (badge) {
+                if (uploadedFiles.length > 0) {
+                    badge.innerText = uploadedFiles.length;
+                    badge.style.display = 'inline-flex';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+            
+            if (uploadedFiles.length === 0) {
+                listTitle.style.display = 'none';
+                listContainer.innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: var(--text-muted); font-size: 0.8rem; font-style: italic;">
+                        No files uploaded in this session.
+                    </div>
+                `;
+                return;
+            }
+            
+            listTitle.style.display = 'block';
+            
+            uploadedFiles.forEach(file => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'file-item';
+                
+                // Checkbox
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'file-item-checkbox';
+                checkbox.checked = file.selected;
+                checkbox.title = "Select to share as AI context";
+                checkbox.addEventListener('change', () => {
+                    file.selected = checkbox.checked;
+                });
+                
+                // Icon based on category
+                const iconDiv = document.createElement('div');
+                iconDiv.className = 'file-item-icon ' + file.category;
+                
+                let iconSvg = '';
+                if (file.category === 'pdf') {
+                    iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m.75 12 3 3m0 0 3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" /></svg>`;
+                } else if (file.category === 'image') {
+                    iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a6 6 0 0 1 8.486 0L21.75 15.75m-18-13.5h16.5a1.5 1.5 0 0 1 1.5 1.5v16.5a1.5 1.5 0 0 1-1.5 1.5H3.75a1.5 1.5 0 0 1-1.5-1.5V3.75a1.5 1.5 0 0 1 1.5-1.5Zm10.5 6a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z" /></svg>`;
+                } else if (file.category === 'text') {
+                    iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" /></svg>`;
+                } else {
+                    iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" /></svg>`;
+                }
+                
+                iconDiv.innerHTML = iconSvg;
+                
+                // Info block
+                const infoDiv = document.createElement('div');
+                infoDiv.className = 'file-item-info';
+                
+                const nameDiv = document.createElement('div');
+                nameDiv.className = 'file-item-name';
+                nameDiv.innerText = file.name;
+                nameDiv.title = file.name;
+                
+                const sizeDiv = document.createElement('div');
+                sizeDiv.className = 'file-item-size';
+                sizeDiv.innerText = formatBytes(file.size);
+                
+                infoDiv.appendChild(nameDiv);
+                infoDiv.appendChild(sizeDiv);
+                
+                // Delete button
+                const deleteBtn = document.createElement('button');
+                deleteBtn.type = 'button';
+                deleteBtn.className = 'file-delete-btn';
+                deleteBtn.title = "Delete file";
+                deleteBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>`;
+                deleteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const index = uploadedFiles.findIndex(f => f.id === file.id);
+                    if (index > -1) {
+                        uploadedFiles.splice(index, 1);
+                        renderFilesSidebar();
+                    }
+                });
+                
+                itemDiv.appendChild(checkbox);
+                itemDiv.appendChild(iconDiv);
+                itemDiv.appendChild(infoDiv);
+                itemDiv.appendChild(deleteBtn);
+                
+                listContainer.appendChild(itemDiv);
+            });
+        }
+
+        // Construct dynamic system prompt context including all active files
+        function getDynamicSystemPrompt() {
+            const activeFiles = uploadedFiles.filter(f => f.selected);
+            if (activeFiles.length === 0) {
+                return systemPrompt;
+            }
+            
+            let fileContext = "\n\nThe user has uploaded the following files:\n";
+            activeFiles.forEach(file => {
+                fileContext += `\nFile: ${file.name}\n${file.content}\n`;
+            });
+            
+            return systemPrompt + fileContext;
+        }
         let history = [
             { role: 'system', content: systemPrompt }
         ];
@@ -1395,6 +2044,7 @@
         const collapsedGroups = {
             'favorites': true,
             'featured': true,
+            'essential': true,
             'anthropic': true,
             'xai': true,
             'chatgpt': true,
@@ -1606,7 +2256,7 @@
                 const searchInput = document.getElementById('dropdown-search');
                 const clearSearchBtn = document.getElementById('clear-search-btn');
                 
-                // Extract clean search term (e.g. "chatgpt" for "ChatGPT")
+                // Extract clean search term (e.g. "free" for "Free Models")
                 let term = titleText.replace('⭐', '').trim().toLowerCase();
                 if (term.includes('models')) {
                     term = term.replace('models', '').trim();
@@ -1778,6 +2428,7 @@
             
             // 3. User Requested Collapsible Categories
             const categories = {
+                'essential': { title: 'Essential Models', models: [] },
                 'anthropic': { title: 'Anthropic', models: [] },
                 'xai': { title: 'xAI', models: [] },
                 'chatgpt': { title: 'ChatGPT', models: [] },
@@ -1790,7 +2441,7 @@
                 categories[groupKey].models.push(m);
             });
             
-            const renderKeys = ['anthropic', 'xai', 'chatgpt', 'deepseek', 'other'];
+            const renderKeys = ['essential', 'anthropic', 'xai', 'chatgpt', 'deepseek', 'other'];
             renderKeys.forEach(key => {
                 const grp = categories[key];
                 if (grp.models.length > 0) {
@@ -1818,6 +2469,58 @@
         // Initial setup
         window.addEventListener('DOMContentLoaded', async () => {
             chatInput.focus();
+            
+            // Files Panel Event Listeners
+            const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
+            if (sidebarToggleBtn) {
+                sidebarToggleBtn.addEventListener('click', toggleFilesSidebar);
+            }
+            
+            const uploadZone = document.getElementById('files-upload-zone');
+            const filesPanelInput = document.getElementById('files-panel-input');
+            
+            if (uploadZone && filesPanelInput) {
+                uploadZone.addEventListener('click', () => {
+                    filesPanelInput.click();
+                });
+                
+                filesPanelInput.addEventListener('change', async (e) => {
+                    const files = e.target.files;
+                    if (!files || files.length === 0) return;
+                    for (let i = 0; i < files.length; i++) {
+                        await processFile(files[i]);
+                    }
+                    filesPanelInput.value = '';
+                });
+                
+                // Drag & Drop
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    uploadZone.addEventListener(eventName, (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        uploadZone.classList.add('dragover');
+                    }, false);
+                });
+                
+                ['dragleave', 'drop'].forEach(eventName => {
+                    uploadZone.addEventListener(eventName, (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        uploadZone.classList.remove('dragover');
+                    }, false);
+                });
+                
+                uploadZone.addEventListener('drop', async (e) => {
+                    const dt = e.dataTransfer;
+                    const files = dt.files;
+                    if (!files || files.length === 0) return;
+                    for (let i = 0; i < files.length; i++) {
+                        await processFile(files[i]);
+                    }
+                });
+            }
+            
+            renderFilesSidebar();
             
             // Add click listener for clear button
             clearBtn.addEventListener('click', clearChat);
@@ -2277,6 +2980,11 @@
                 });
             } else {
                 history.push({ role: 'user', content: text });
+            }
+
+            // Dynamically update the system prompt with files context
+            if (history.length > 0 && history[0].role === 'system') {
+                history[0].content = getDynamicSystemPrompt();
             }
 
             // 2. Set waiting state
