@@ -1393,14 +1393,14 @@
 
         // Collapsed state map for groups: key -> true if collapsed
         const collapsedGroups = {
-            'favorites': false,
-            'featured': false,
-            'free': false,
-            'anthropic': false,
-            'xai': false,
-            'chatgpt': false,
-            'deepseek': false,
-            'other': false
+            'favorites': true,
+            'featured': true,
+            'free': true,
+            'anthropic': true,
+            'xai': true,
+            'chatgpt': true,
+            'deepseek': true,
+            'other': true
         };
 
         function toggleGroupCollapse(groupKey) {
@@ -1591,6 +1591,7 @@
             titleDiv.className = 'dropdown-group-title';
             
             const labelSpan = document.createElement('span');
+            labelSpan.className = 'group-title-label';
             labelSpan.innerText = titleText;
             titleDiv.appendChild(labelSpan);
             
@@ -1604,9 +1605,36 @@
             chevronSvg.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />`;
             titleDiv.appendChild(chevronSvg);
             
-            titleDiv.addEventListener('click', (e) => {
-                e.stopPropagation(); // prevent menu closing
+            // Clicking the text label triggers the filter search
+            labelSpan.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const searchInput = document.getElementById('dropdown-search');
+                const clearSearchBtn = document.getElementById('clear-search-btn');
+                
+                // Extract clean search term (e.g. "free" for "Free Models")
+                let term = titleText.replace('⭐', '').trim().toLowerCase();
+                if (term.includes('models')) {
+                    term = term.replace('models', '').trim();
+                }
+                
+                searchInput.value = term;
+                clearSearchBtn.style.display = 'flex';
+                renderDropdownOptions();
+                searchInput.focus();
+            });
+            
+            // Clicking the chevron toggles collapse/expand state
+            chevronSvg.addEventListener('click', (e) => {
+                e.stopPropagation();
                 toggleGroupCollapse(groupKey);
+            });
+            
+            // Clicking the background of the header toggles collapse
+            titleDiv.addEventListener('click', (e) => {
+                if (e.target !== labelSpan && !chevronSvg.contains(e.target)) {
+                    e.stopPropagation();
+                    toggleGroupCollapse(groupKey);
+                }
             });
             
             return titleDiv;
@@ -1695,7 +1723,30 @@
             dropdownOptionsContainer.innerHTML = '';
             
             const filteredModels = allModels.filter(m => {
-                return m.name.toLowerCase().includes(query) || m.id.toLowerCase().includes(query);
+                const groupKey = getModelGroupKey(m);
+                const matchesSearch = m.name.toLowerCase().includes(query) || m.id.toLowerCase().includes(query);
+                
+                // Smart search keyword expansions
+                if (query === 'free' && groupKey === 'free') {
+                    return true;
+                }
+                if ((query === 'anthropic' || query === 'claude') && groupKey === 'anthropic') {
+                    return true;
+                }
+                if ((query === 'xai' || query === 'grok') && groupKey === 'xai') {
+                    return true;
+                }
+                if ((query === 'chatgpt' || query === 'gpt' || query === 'openai') && groupKey === 'chatgpt') {
+                    return true;
+                }
+                if (query === 'deepseek' && groupKey === 'deepseek') {
+                    return true;
+                }
+                if ((query === 'featured' || query === 'featured models') && featuredModelIds.includes(m.id)) {
+                    return true;
+                }
+                
+                return matchesSearch;
             });
             
             // 1. Favorites Group
