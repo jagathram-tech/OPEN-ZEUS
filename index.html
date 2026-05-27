@@ -375,13 +375,58 @@
             font-weight: 600;
         }
 
-        .dropdown-option.selected::after {
-            content: '';
+        .option-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .selected-indicator-dot {
             width: 6px;
             height: 6px;
             background-color: var(--primary);
             border-radius: 50%;
+            display: none;
+        }
+
+        .dropdown-option.selected .selected-indicator-dot {
             display: inline-block;
+        }
+
+        .favorite-star-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            transition: color 0.15s ease, transform 0.15s ease;
+            outline: none;
+            border-radius: 4px;
+        }
+
+        .favorite-star-btn:hover {
+            color: #eab308;
+            transform: scale(1.15);
+        }
+
+        .favorite-star-btn.active {
+            color: #eab308;
+        }
+
+        .star-icon {
+            width: 14px;
+            height: 14px;
+            fill: currentColor;
+            stroke: currentColor;
+            stroke-width: 1.5;
+            transition: fill 0.15s ease, stroke 0.15s ease;
+        }
+
+        .favorite-star-btn:not(.active) .star-icon {
+            fill: none;
         }
 
         .dropdown-no-results {
@@ -1233,8 +1278,7 @@
         </footer>
     </div>
 
-    <script>
-        // State variables
+    <script>        // State variables
         const systemPrompt = "You are a helpful, friendly assistant. Be concise and clear.";
         let history = [
             { role: 'system', content: systemPrompt }
@@ -1243,8 +1287,171 @@
         let currentModel = 'claude-sonnet-4-6';
         let selectedImageBase64 = null;
         let isWebSearchEnabled = false;
+        
+        // These will be populated dynamically, initialized with fallback sets
         const imageModels = ['gpt-image-2', 'gpt-image-1.5', 'gpt-image-1-mini', 'gpt-image-1', 'dall-e-3', 'dall-e-2'];
         const ttsModels = ['gpt-4o-mini-tts', 'tts-1', 'tts-1-hd'];
+
+        // Core Models Directory (Predefined fallback list)
+        const PREDEFINED_MODELS = [
+            // Anthropic
+            { id: 'claude-sonnet-4-6', name: 'Claude Sonnet 4.6', provider: 'anthropic', category: 'chat' },
+            { id: 'claude-opus-4.7-fast', name: 'Claude Opus 4.7 Fast', provider: 'anthropic', category: 'chat' },
+            { id: 'claude-opus-4-7', name: 'Claude Opus 4.7', provider: 'anthropic', category: 'chat' },
+            { id: 'claude-opus-4.6-fast', name: 'Claude Opus 4.6 Fast', provider: 'anthropic', category: 'chat' },
+            { id: 'claude-opus-4-6', name: 'Claude Opus 4.6', provider: 'anthropic', category: 'chat' },
+            { id: 'claude-opus-4-5', name: 'Claude Opus 4.5', provider: 'anthropic', category: 'chat' },
+            { id: 'claude-haiku-4-5', name: 'Claude Haiku 4.5', provider: 'anthropic', category: 'chat' },
+            { id: 'claude-sonnet-4-5', name: 'Claude Sonnet 4.5', provider: 'anthropic', category: 'chat' },
+            { id: 'claude-opus-4-1', name: 'Claude Opus 4.1', provider: 'anthropic', category: 'chat' },
+            { id: 'claude-opus-4', name: 'Claude Opus 4', provider: 'anthropic', category: 'chat' },
+            { id: 'claude-sonnet-4', name: 'Claude Sonnet 4', provider: 'anthropic', category: 'chat' },
+            
+            // OpenAI
+            { id: 'gpt-5.5', name: 'GPT 5.5', provider: 'openai', category: 'chat' },
+            { id: 'gpt-5.4', name: 'GPT 5.4', provider: 'openai', category: 'chat' },
+            { id: 'gpt-5.4-mini', name: 'GPT 5.4 Mini', provider: 'openai', category: 'chat' },
+            { id: 'gpt-5.4-nano', name: 'GPT 5.4 Nano', provider: 'openai', category: 'chat' },
+            { id: 'gpt-4o', name: 'GPT-4o', provider: 'openai', category: 'chat' },
+            { id: 'gpt-4o-mini', name: 'GPT-4o Mini', provider: 'openai', category: 'chat' },
+            { id: 'o1-mini', name: 'o1 Mini', provider: 'openai', category: 'chat' },
+            { id: 'o3-mini', name: 'o3 Mini', provider: 'openai', category: 'chat' },
+            { id: 'o4-mini', name: 'o4 Mini', provider: 'openai', category: 'chat' },
+            
+            // Image Generation
+            { id: 'gpt-image-2', name: 'GPT Image 2', provider: 'openai', category: 'image' },
+            { id: 'gpt-image-1.5', name: 'GPT Image 1.5', provider: 'openai', category: 'image' },
+            { id: 'gpt-image-1-mini', name: 'GPT Image 1 Mini', provider: 'openai', category: 'image' },
+            { id: 'gpt-image-1', name: 'GPT Image 1', provider: 'openai', category: 'image' },
+            { id: 'dall-e-3', name: 'DALL-E 3', provider: 'openai', category: 'image' },
+            { id: 'dall-e-2', name: 'DALL-E 2', provider: 'openai', category: 'image' },
+            
+            // Text to Speech
+            { id: 'gpt-4o-mini-tts', name: 'GPT 4o Mini TTS', provider: 'openai', category: 'tts' },
+            { id: 'tts-1', name: 'TTS 1', provider: 'openai', category: 'tts' },
+            { id: 'tts-1-hd', name: 'TTS 1 HD', provider: 'openai', category: 'tts' }
+        ];
+
+        let allModels = [...PREDEFINED_MODELS];
+
+        // Featured Model IDs for quick access
+        const featuredModelIds = [
+            'claude-sonnet-4-6',
+            'gpt-4o',
+            'gpt-4o-mini',
+            'gpt-image-2',
+            'tts-1-hd'
+        ];
+
+        // IP-keyed favorites state
+        let userIp = 'local';
+
+        async function fetchIp() {
+            try {
+                const res = await fetch('https://api.ipify.org?format=json');
+                const data = await res.json();
+                if (data && data.ip) {
+                    userIp = data.ip;
+                    console.log("Loaded User IP:", userIp);
+                }
+            } catch (e) {
+                console.warn("Could not retrieve IP address. Defaulting to local storage key:", e);
+            }
+        }
+
+        function getFavoritesKey() {
+            return `open_zeus_favs_${userIp}`;
+        }
+
+        function getFavorites() {
+            const key = getFavoritesKey();
+            try {
+                const favs = localStorage.getItem(key);
+                return favs ? JSON.parse(favs) : [];
+            } catch (e) {
+                console.error("Error reading favorites:", e);
+                return [];
+            }
+        }
+
+        function saveFavorites(favs) {
+            const key = getFavoritesKey();
+            try {
+                localStorage.setItem(key, JSON.stringify(favs));
+            } catch (e) {
+                console.error("Error saving favorites:", e);
+            }
+        }
+
+        function toggleFavorite(modelId, event) {
+            if (event) event.stopPropagation(); // prevent selection of the option
+            
+            let favs = getFavorites();
+            const index = favs.indexOf(modelId);
+            if (index > -1) {
+                favs.splice(index, 1);
+            } else {
+                favs.push(modelId);
+            }
+            saveFavorites(favs);
+            
+            // Instantly re-render the dropdown while keeping it open
+            renderDropdownOptions();
+        }
+
+        // Dynamically fetch and merge models from Puter
+        async function loadDynamicModels() {
+            try {
+                if (typeof puter === 'undefined' || !puter.ai || !puter.ai.listModels) {
+                    console.warn("Puter SDK is not loaded or listModels is unavailable.");
+                    return;
+                }
+                const dynamicModels = await puter.ai.listModels();
+                if (Array.isArray(dynamicModels)) {
+                    dynamicModels.forEach(m => {
+                        const modelId = m.id || m.key;
+                        if (!modelId) return;
+                        
+                        const exists = allModels.some(existing => existing.id === modelId);
+                        if (!exists) {
+                            // Detect model category
+                            let category = 'chat';
+                            const lowerId = modelId.toLowerCase();
+                            const lowerName = (m.name || '').toLowerCase();
+                            if (lowerId.includes('image') || lowerId.includes('dall-e') || lowerId.includes('txt2img') || lowerName.includes('image') || lowerName.includes('dall-e') || lowerName.includes('txt2img')) {
+                                category = 'image';
+                            } else if (lowerId.includes('tts') || lowerId.includes('txt2speech') || lowerId.includes('speech') || lowerName.includes('tts') || lowerName.includes('txt2speech') || lowerName.includes('speech')) {
+                                if (!lowerId.includes('speech2txt') && !lowerId.includes('whisper')) {
+                                    category = 'tts';
+                                }
+                            }
+                            
+                            allModels.push({
+                                id: modelId,
+                                name: m.name || modelId,
+                                provider: m.provider || 'other',
+                                category: category
+                            });
+                        }
+                    });
+                }
+            } catch (e) {
+                console.error("Failed to load Puter.js models:", e);
+            }
+        }
+
+        // Populate lists dynamically
+        function updateModelCategories() {
+            imageModels.length = 0;
+            allModels.forEach(m => {
+                if (m.category === 'image') imageModels.push(m.id);
+            });
+            
+            ttsModels.length = 0;
+            allModels.forEach(m => {
+                if (m.category === 'tts') ttsModels.push(m.id);
+            });
+        }
 
         // DOM elements
         const messageArea = document.getElementById('message-area');
@@ -1263,7 +1470,7 @@
         const imagePreviewImg = document.getElementById('image-preview-img');
         const removeImageBtn = document.getElementById('remove-image-btn');
 
-        // Helpers
+        // Web search helper
         function updateWebSearchButtonState() {
             if (!webSearchToggleBtn) return;
             const isImageModel = imageModels.includes(currentModel);
@@ -1281,8 +1488,214 @@
             }
         }
 
+        // Create a single dropdown option element
+        function createOptionElement(m) {
+            const isSelected = (currentModel === m.id);
+            const favs = getFavorites();
+            const isFav = favs.includes(m.id);
+            
+            const optionDiv = document.createElement('div');
+            optionDiv.className = `dropdown-option ${isSelected ? 'selected' : ''}`;
+            optionDiv.setAttribute('data-value', m.id);
+            
+            const cleanName = m.name.replace(' (Default)', '');
+            
+            const nameSpan = document.createElement('span');
+            nameSpan.className = 'option-name';
+            nameSpan.innerText = cleanName;
+            optionDiv.appendChild(nameSpan);
+            
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'option-actions';
+            
+            const dotSpan = document.createElement('span');
+            dotSpan.className = 'selected-indicator-dot';
+            actionsDiv.appendChild(dotSpan);
+            
+            const starBtn = document.createElement('button');
+            starBtn.type = 'button';
+            starBtn.className = `favorite-star-btn ${isFav ? 'active' : ''}`;
+            starBtn.title = isFav ? 'Remove from Favorites' : 'Add to Favorites';
+            starBtn.innerHTML = `
+                <svg class="star-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
+                </svg>
+            `;
+            
+            starBtn.addEventListener('click', (e) => {
+                toggleFavorite(m.id, e);
+            });
+            
+            actionsDiv.appendChild(starBtn);
+            optionDiv.appendChild(actionsDiv);
+            
+            // Selection logic
+            optionDiv.addEventListener('click', (e) => {
+                if (starBtn.contains(e.target)) return;
+                
+                currentModel = m.id;
+                botStatusText.innerText = `Online • ${cleanName}`;
+                document.getElementById('selected-model-name').innerText = cleanName;
+                
+                // Highlight everywhere
+                const allOptions = document.querySelectorAll('.dropdown-option');
+                allOptions.forEach(opt => {
+                    if (opt.getAttribute('data-value') === m.id) {
+                        opt.classList.add('selected');
+                    } else {
+                        opt.classList.remove('selected');
+                    }
+                });
+                
+                updateWebSearchButtonState();
+                
+                // Close menu
+                const customDropdown = document.getElementById('custom-dropdown');
+                if (customDropdown) {
+                    customDropdown.classList.remove('open');
+                }
+            });
+            
+            return optionDiv;
+        }
+
+        // Render options dynamically
+        function renderDropdownOptions() {
+            const dropdownOptionsContainer = document.getElementById('dropdown-options');
+            if (!dropdownOptionsContainer) return;
+            
+            const query = document.getElementById('dropdown-search').value.trim().toLowerCase();
+            const favs = getFavorites();
+            
+            dropdownOptionsContainer.innerHTML = '';
+            
+            const filteredModels = allModels.filter(m => {
+                return m.name.toLowerCase().includes(query) || m.id.toLowerCase().includes(query);
+            });
+            
+            // 1. Favorites Group
+            const favoriteList = filteredModels.filter(m => favs.includes(m.id));
+            if (favoriteList.length > 0) {
+                const groupDiv = document.createElement('div');
+                groupDiv.className = 'dropdown-group';
+                
+                const titleDiv = document.createElement('div');
+                titleDiv.className = 'dropdown-group-title';
+                titleDiv.innerText = '⭐ Favorites';
+                groupDiv.appendChild(titleDiv);
+                
+                favoriteList.forEach(m => {
+                    groupDiv.appendChild(createOptionElement(m));
+                });
+                dropdownOptionsContainer.appendChild(groupDiv);
+            }
+            
+            // 2. Featured Models Group
+            const featuredList = filteredModels.filter(m => featuredModelIds.includes(m.id));
+            if (featuredList.length > 0) {
+                const groupDiv = document.createElement('div');
+                groupDiv.className = 'dropdown-group';
+                
+                const titleDiv = document.createElement('div');
+                titleDiv.className = 'dropdown-group-title';
+                titleDiv.innerText = '⭐ Featured Models';
+                groupDiv.appendChild(titleDiv);
+                
+                featuredList.forEach(m => {
+                    groupDiv.appendChild(createOptionElement(m));
+                });
+                dropdownOptionsContainer.appendChild(groupDiv);
+            }
+            
+            // 3. Category Groups
+            const groups = {
+                'anthropic': { title: 'Anthropic (Claude)', models: [] },
+                'openai': { title: 'OpenAI (GPT)', models: [] },
+                'image': { title: 'Image Generation', models: [] },
+                'tts': { title: 'Text-to-Speech', models: [] }
+            };
+            
+            const otherGroups = {};
+            
+            filteredModels.forEach(m => {
+                if (m.category === 'image') {
+                    groups['image'].models.push(m);
+                } else if (m.category === 'tts') {
+                    groups['tts'].models.push(m);
+                } else {
+                    const provider = (m.provider || '').toLowerCase();
+                    if (provider === 'anthropic' || m.id.toLowerCase().includes('claude')) {
+                        groups['anthropic'].models.push(m);
+                    } else if (provider === 'openai' || m.id.toLowerCase().includes('gpt') || m.id.toLowerCase().includes('o1') || m.id.toLowerCase().includes('o3')) {
+                        groups['openai'].models.push(m);
+                    } else {
+                        let groupKey = provider || 'other';
+                        let groupTitle = m.provider ? m.provider.charAt(0).toUpperCase() + m.provider.slice(1) : 'Other Models';
+                        
+                        if (m.id.toLowerCase().includes('gemini') || m.name.toLowerCase().includes('gemini')) {
+                            groupKey = 'google';
+                            groupTitle = 'Google (Gemini)';
+                        } else if (m.id.toLowerCase().includes('llama') || m.name.toLowerCase().includes('llama')) {
+                            groupKey = 'meta';
+                            groupTitle = 'Meta (Llama)';
+                        } else if (m.id.toLowerCase().includes('deepseek') || m.name.toLowerCase().includes('deepseek')) {
+                            groupKey = 'deepseek';
+                            groupTitle = 'DeepSeek';
+                        }
+                        
+                        if (!otherGroups[groupKey]) {
+                            otherGroups[groupKey] = { title: groupTitle, models: [] };
+                        }
+                        otherGroups[groupKey].models.push(m);
+                    }
+                }
+            });
+            
+            const keys = ['anthropic', 'openai', 'image', 'tts'];
+            keys.forEach(key => {
+                const grp = groups[key];
+                if (grp.models.length > 0) {
+                    const groupDiv = document.createElement('div');
+                    groupDiv.className = 'dropdown-group';
+                    
+                    const titleDiv = document.createElement('div');
+                    titleDiv.className = 'dropdown-group-title';
+                    titleDiv.innerText = grp.title;
+                    groupDiv.appendChild(titleDiv);
+                    
+                    grp.models.forEach(m => {
+                        groupDiv.appendChild(createOptionElement(m));
+                    });
+                    dropdownOptionsContainer.appendChild(groupDiv);
+                }
+            });
+            
+            Object.keys(otherGroups).forEach(key => {
+                const grp = otherGroups[key];
+                if (grp.models.length > 0) {
+                    const groupDiv = document.createElement('div');
+                    groupDiv.className = 'dropdown-group';
+                    
+                    const titleDiv = document.createElement('div');
+                    titleDiv.className = 'dropdown-group-title';
+                    titleDiv.innerText = grp.title;
+                    groupDiv.appendChild(titleDiv);
+                    
+                    grp.models.forEach(m => {
+                        groupDiv.appendChild(createOptionElement(m));
+                    });
+                    dropdownOptionsContainer.appendChild(groupDiv);
+                }
+            });
+            
+            const noResults = document.getElementById('dropdown-no-results');
+            if (noResults) {
+                noResults.style.display = (filteredModels.length === 0) ? 'block' : 'none';
+            }
+        }
+
         // Initial setup
-        window.addEventListener('DOMContentLoaded', () => {
+        window.addEventListener('DOMContentLoaded', async () => {
             chatInput.focus();
             
             // Add click listener for clear button
@@ -1293,12 +1706,37 @@
             const dropdownTrigger = document.getElementById('dropdown-trigger');
             const dropdownSearch = document.getElementById('dropdown-search');
             const clearSearchBtn = document.getElementById('clear-search-btn');
-            const dropdownOptionsList = document.querySelectorAll('.dropdown-option');
-            const dropdownGroups = document.querySelectorAll('.dropdown-group');
-            const dropdownNoResults = document.getElementById('dropdown-no-results');
 
-            // Initialize Web Search button state
+            // Render options immediately with fallbacks
+            updateModelCategories();
+            renderDropdownOptions();
             updateWebSearchButtonState();
+
+            // Set initial selected model name in UI
+            const defaultModel = allModels.find(m => m.id === currentModel) || allModels[0];
+            if (defaultModel) {
+                const cleanName = defaultModel.name.replace(' (Default)', '');
+                botStatusText.innerText = `Online • ${cleanName}`;
+                document.getElementById('selected-model-name').innerText = cleanName;
+            }
+
+            // Load dynamically in background
+            try {
+                await fetchIp();
+                await loadDynamicModels();
+                updateModelCategories();
+                renderDropdownOptions();
+                
+                // Keep selected model correct
+                const currentObj = allModels.find(m => m.id === currentModel);
+                if (currentObj) {
+                    const cleanName = currentObj.name.replace(' (Default)', '');
+                    botStatusText.innerText = `Online • ${cleanName}`;
+                    document.getElementById('selected-model-name').innerText = cleanName;
+                }
+            } catch (err) {
+                console.error("Failed async initialization:", err);
+            }
 
             // Toggle dropdown open/close
             dropdownTrigger.addEventListener('click', (e) => {
@@ -1307,7 +1745,8 @@
                 customDropdown.classList.toggle('open');
                 if (customDropdown.classList.contains('open')) {
                     dropdownSearch.value = '';
-                    dropdownSearch.dispatchEvent(new Event('input'));
+                    clearSearchBtn.style.display = 'none';
+                    renderDropdownOptions();
                     dropdownSearch.focus();
                 }
             });
@@ -1322,72 +1761,17 @@
             // Search filtering
             dropdownSearch.addEventListener('input', () => {
                 const query = dropdownSearch.value.trim().toLowerCase();
-                
-                // Show/hide clear search button
                 clearSearchBtn.style.display = query ? 'flex' : 'none';
-                
-                let anyVisible = false;
-
-                dropdownGroups.forEach(group => {
-                    let groupVisibleCount = 0;
-                    const options = group.querySelectorAll('.dropdown-option');
-                    
-                    options.forEach(opt => {
-                        const text = opt.innerText.toLowerCase();
-                        if (text.includes(query)) {
-                            opt.style.display = 'flex';
-                            groupVisibleCount++;
-                            anyVisible = true;
-                        } else {
-                            opt.style.display = 'none';
-                        }
-                    });
-
-                    // Hide group title if no options in it are visible
-                    if (groupVisibleCount > 0) {
-                        group.style.display = 'block';
-                    } else {
-                        group.style.display = 'none';
-                    }
-                });
-
-                dropdownNoResults.style.display = anyVisible ? 'none' : 'block';
+                renderDropdownOptions();
             });
 
             // Clear search text
             clearSearchBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 dropdownSearch.value = '';
-                dropdownSearch.dispatchEvent(new Event('input'));
+                clearSearchBtn.style.display = 'none';
+                renderDropdownOptions();
                 dropdownSearch.focus();
-            });
-
-            // Option selection click handler
-            dropdownOptionsList.forEach(option => {
-                option.addEventListener('click', () => {
-                    const value = option.getAttribute('data-value');
-                    const text = option.innerText;
-                    
-                    currentModel = value;
-                    const cleanName = text.replace(' (Default)', '');
-                    botStatusText.innerText = `Online • ${cleanName}`;
-                    document.getElementById('selected-model-name').innerText = cleanName;
-                    
-                    // Highlight selected option
-                    dropdownOptionsList.forEach(opt => {
-                        if (opt.getAttribute('data-value') === value) {
-                            opt.classList.add('selected');
-                        } else {
-                            opt.classList.remove('selected');
-                        }
-                    });
-
-                    // Update web search toggle button state
-                    updateWebSearchButtonState();
-
-                    // Close dropdown
-                    customDropdown.classList.remove('open');
-                });
             });
 
             // Web Search Toggle listener
